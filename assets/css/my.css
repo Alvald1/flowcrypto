@@ -1,0 +1,172 @@
+span.selection,
+span.select2-selection.select2-selection--single {
+    background-color: #DAE2A5;
+}
+
+span.select2-selection__placeholder {
+    color: black !important;
+}
+
+
+input,
+select,
+.form-control {
+    background-color: #DAE2A5;
+}
+
+.card {
+    box-shadow: 0 0 28px 19px rgba(0, 0, 0, 0.2);
+}
+
+span.select2-dropdown.select2-dropdown--below {
+    background-color: #BFC597;
+}
+
+#navbar-main-collapse span {
+
+    font-family: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
+    font-size: 1.2rem;
+    color: #cebb10;
+}
+
+table.table-bordered {}
+
+.active span {
+    color: #FCF8D4 !important;
+}
+
+.btn.btn-sm {
+    background-color: #E9E4AA;
+}
+
+.card.card-body,
+.card {
+    background-color: #BDD59C;
+}
+
+.page,
+.modal-content {
+    background-color: #BFC597;
+}
+
+#navbar-main-collapse {
+    background-color: #826685;
+}
+
+/* Затемненный фон */
+.custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Затемнение */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    /* Высокий приоритет отображения */
+    display: none;
+    /* Скрыто по умолчанию */
+}
+
+/* Стиль окна */
+.custom-alert-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+}
+
+.custom-alert-box p {
+    margin-bottom: 20px;
+}
+
+.alert-details {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.alert-details label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.alert-details input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.alert-details input:read-only {
+    cursor: text;
+}
+
+.custom-alert-box button {
+    cursor: pointer;
+}
+
+
+.active-label {
+    color: green;
+}
+
+.inactive-label {
+    color: red;
+}
+
+/* Убедитесь, что стили для Select2 корректны */
+.select2-container--default .select2-selection--single {
+    height: 38px;
+    /* Проверьте и скорректируйте высоту */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: normal;
+    /* Убедитесь, что line-height установлен правильно */
+    margin-left: 10px;
+    /* Настройте отступы */
+}
+
+.select2-container {
+    position: relative;
+    /* Убедитесь, что контейнер относительно позиционирован */
+}
+
+.select2 select2-container select2-container--default select2-container--below select2-container--open {
+    height: 60px;
+}
+
+.select2-dropdown {
+    position: absolute;
+    /* Абсолютное позиционирование для выпадающего списка */
+    top: 100%;
+    /* Начинаем с позиции после контейнера */
+    left: 0;
+    z-index: 1000;
+    /* Убедитесь, что z-index достаточно высок */
+}
+
+.select2-results__option img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.select2-selection__rendered img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
