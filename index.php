@@ -41,7 +41,7 @@ get_header(); ?>
                                 <div class="d-flex gap-2 align-items-center pe-1 ps-1"><a
                                         href="/account-operations?currency=USDT"
                                         class="btn btn-sm btn-outline-dark text-nowrap text-capitalize"><i
-                                            class="fa fa-list"></i> история</a><button type="button"
+                                            class="fa fa-list"></i> история</a><button id="withdrawal" type="button"
                                         class="btn btn-sm btn-outline-dark text-nowrap text-capitalize"><i
                                             class="fa-solid fa-upload"></i> вывести</button><button id="replenish"
                                         type="button" class="btn btn-sm btn-outline-dark text-nowrap text-capitalize"><i
@@ -73,12 +73,13 @@ get_header(); ?>
 
 </div>
 
-<div id="outcome" class="modal fade show" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
+<div id="outcome" class="modal fade show" tabindex="-1" style="display: none; z-index: 2;" aria-modal="true"
+    role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header text-capitalize">
-                <h5 class="modal-title">снятие</h5><button type="button" class="btn-close" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+                <h5 class="modal-title">снятие</h5><button type="button" class="btn-close_outcome btn-close"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-0">
                 <form>
@@ -87,31 +88,30 @@ get_header(); ?>
                             <div class="row mt-2">
                                 <div class="col-sm-12 d-flex align-items-center p-2 justify-content-center">
                                     <div class="d-flex align-items-center p-0"><img class="account-currency-icon"
-                                            src="/img/USDT_TRC20.4349296f.svg" alt="USDT">
+                                            src=<?= get_template_directory_uri() . "/assets/img/icons/icon_trc.png" ?>
+                                            alt="USDT">
                                         <div class="account-sum">
-                                            <!----><span class="account-amount text-nowrap">0.00000000 USDT</span><span
-                                                style="font-size: 70%;" class="text-success">Страховочный лимит: 0.00 /
-                                                2 000.00 USDT</span><small class="text-danger"><i
-                                                    class="fa fa-warning"></i> Сумма должна быть больше страховочного
-                                                депозита 2 000.00 USDT</small><span class="on-hold">заблокировано:
-                                                0.00000000 USDT</span>
+                                            <!----><span class="account-amount text-nowrap"></span><span
+                                                style="font-size: 70%;" class="text-success limit"></span><span
+                                                class="on-hold">заблокировано: 0.000000
+                                                USDT</span><small class="text-danger"><i class="fa fa-warning"></i>
+                                                Сумма должна быть больше страховочного депозита 1 000.00
+                                                USDT</small>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="row mt-2"><label for="amount"
-                                    class="col-sm-12 col-form-label text-capitalize-first">сумма <a
-                                        href="#"><small>0.00000000</small></a></label>
+                                    class="col-sm-12 col-form-label text-capitalize-first">сумма </label>
                                 <div class="col-sm-12">
-                                    <div><input class="form-control" type="text" id="amount"></div>
+                                    <div><input class="form-control" type="number" id="amount"></div>
                                 </div>
                                 <div><small>комиссия за вывод составляет 2.00 USDT</small></div>
                             </div>
                             <div class="row mt-2">
                                 <div class="col-sm-12"><label for="address"
                                         class="col-form-label text-capitalize-first">Адрес кошелька (USDT
-                                        TRC20)</label><button type="button" class="btn btn-sm btn-link">редактировать
-                                        вайтлисты</button></div>
+                                        TRC20)</label></div>
                                 <div class="col-sm-12">
                                     <div><input class="form-control" type="text" id="address"></div>
                                 </div>
@@ -122,7 +122,7 @@ get_header(); ?>
                 </form>
             </div>
             <div class="modal-footer d-flex justify-content-between"><button type="button"
-                    class="btn btn-outline-dark btn-sm text-capitalize-first">отменить</button>
+                    class="btn btn-outline-dark btn-sm text-capitalize-first btn-close_outcome2">отменить</button>
                 <div class="loader-wrapper"><button type="button"
                         class="btn btn-outline-primary btn-sm text-capitalize-first">вывести</button>
                     <!---->

@@ -49,6 +49,52 @@ document.addEventListener('DOMContentLoaded', function () {//устройств�
     });
 });
 
+document.addEventListener('DOMContentLoaded', function () {//устройства
+    // Находим кнопку, открывающую модальное окно
+    const openButton = document.getElementById('withdrawal');
+    const closeButton = document.querySelector('.btn-close_outcome');
+    const closeButton2 = document.querySelector('.btn-close_outcome2');
+    // Находим модальное окно
+    const modal = document.getElementById('outcome');
+
+
+
+    // Функция для открытия модального окна
+    function openModal() {
+        modal.classList.add('show');
+        modal.style.display = 'block';
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-hidden', 'false');
+        document.querySelector('.modal-backdrop.fade.show').style.visibility = 'visible';
+    }
+
+    // Функция для закрытия модального окна
+    function closeModal() {
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        modal.removeAttribute('aria-modal');
+        modal.removeAttribute('role');
+        modal.setAttribute('aria-hidden', 'true');
+        document.querySelector('.modal-backdrop.fade.show').style.visibility = 'hidden';
+    }
+
+    // Обработчик события нажатия на кнопку открытия
+    openButton.addEventListener('click', openModal);
+
+    // Обработчик события нажатия на кнопку закрытия
+    closeButton.addEventListener('click', closeModal);
+    // Обработчик события нажатия на кнопку закрытия
+    closeButton2.addEventListener('click', closeModal);
+
+    // Закрытие модального окна при клике на любое место вне модального окна
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+});
+
 jQuery(document).ready(function ($) {
     $.ajax({
         url: myajax.url,
