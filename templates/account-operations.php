@@ -89,7 +89,6 @@ get_header(); ?>
                                     <th class="text-capitalize-first">тип</th>
                                     <th class="text-capitalize-first">Баланс до</th>
                                     <th class="text-capitalize-first">Баланс после</th>
-                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody></tbody>

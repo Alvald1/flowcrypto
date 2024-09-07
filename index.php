@@ -104,7 +104,7 @@ get_header(); ?>
                             <div class="row mt-2"><label for="amount"
                                     class="col-sm-12 col-form-label text-capitalize-first">сумма </label>
                                 <div class="col-sm-12">
-                                    <div><input class="form-control" type="number" id="amount"></div>
+                                    <div><input class="form-control" type="number" id="amount2"></div>
                                 </div>
                                 <div><small>комиссия за вывод составляет 2.00 USDT</small></div>
                             </div>

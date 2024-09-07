@@ -626,21 +626,38 @@ function update_balance()
     if (!check_ajax_referer('nonce_update_balance', 'security', false)) {
         wp_send_json_error('Неверный nonce.');
     }
-    if (isset($_POST['income'])) {
+    if (isset($_POST['amount'])) {
+        $amount = $_POST['amount'];
+        $time = $_POST['time'];
+        $hash = $_POST['hash'];
         $user_id = get_current_user_id();
-        $income = floatval($_POST['income']);
-        $t = get_user_meta($user_id, 'limit', true);
-        $cur_limit = floatval($t == '' ? '0' : $t);
-        $t = get_user_meta($user_id, 'balance', true);
-        $prev_balance = floatval($t == '' ? '0' : $t);
-        $remains = ($cur_limit + $income + $prev_balance) - 2000;
-        if ($remains >= 0) {
-            update_user_meta($user_id, 'limit', 2000);
-            update_user_meta($user_id, 'balance', $remains);
-        } else {
-            update_user_meta($user_id, 'limit', 2000 + $remains);
-            update_user_meta($user_id, 'balance', 0);
+        $operations = get_user_meta($user_id, 'operations', true);
+        if (is_array($operations) == false) {
+            $operations = [];
         }
+        foreach ($operations as $operation) {
+            if ($operation['hash'] === $hash) {
+                wp_send_json_error('duplicate');
+            }
+        }
+        $income = floatval($amount);
+        $tmp = get_user_meta($user_id, 'limit', true);
+        $cur_limit = floatval($tmp == '' ? '0' : $tmp);
+        $tmp = get_user_meta($user_id, 'balance', true);
+        $prev_balance = floatval($tmp == '' ? '0' : $tmp);
+        $remains = ($cur_limit + $income + $prev_balance) - 1000;
+
+        if ($remains >= 0) {
+            update_user_meta($user_id, 'limit', 1000);
+            update_user_meta($user_id, 'balance', $remains);
+            $oper = array('hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => $remains, 'time' => $time);
+        } else {
+            update_user_meta($user_id, 'limit', 1000 + $remains);
+            update_user_meta($user_id, 'balance', 0);
+            $oper = array('hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => 0, 'time' => $time);
+        }
+        $operations[] = $oper;
+        update_user_meta($user_id, 'operations', $operations);
         wp_send_json_success('');
     } else {
         wp_send_json_error('No data received');

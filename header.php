@@ -61,7 +61,7 @@
                     <div class="d-flex flex-column">
                         <ul class="navbar-nav flex-column">
                             <li class="nav-item">
-                                <a class="navbar-brand" href="#">
+                                <a class="navbar-brand" href="/">
                                     <img src=<?= get_template_directory_uri() . "/assets/img/icons/logo-name.png" ?>
                                         alt="" height="80px">
                                 </a>
