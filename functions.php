@@ -88,6 +88,10 @@ function add_js_and_css()
         wp_enqueue_script('settings', get_template_directory_uri() . '/assets/js/settings.js', array('jquery'), null, true);
 
     }
+    if (is_page_template('templates/account-operations.php')) {
+        wp_enqueue_script('account-operations', get_template_directory_uri() . '/assets/js/account-operations.js', array('jquery'), null, true);
+
+    }
     if (is_page_template('templates/requisites.php')) {
         wp_enqueue_script('requisites', get_template_directory_uri() . '/assets/js/requisites.js', array('jquery'), null, true);
         wp_enqueue_script('generate_devices', get_template_directory_uri() . '/assets/js/generate_devices.js', array('jquery'), null, true);
@@ -132,6 +136,7 @@ function myajax_data()
     $nonce_generate_uuid = wp_create_nonce('nonce_generate_uuid');
     $nonce_check_status = wp_create_nonce('nonce_check_status');
     $nonce_change_status = wp_create_nonce('nonce_change_status');
+    $nonce_refresh_user_meta_operations = wp_create_nonce('nonce_refresh_user_meta_operations');
 
 
     wp_localize_script(
@@ -160,6 +165,7 @@ function myajax_data()
             'nonce_generate_uuid' => $nonce_generate_uuid,
             'nonce_check_status' => $nonce_check_status,
             'nonce_change_status' => $nonce_change_status,
+            'nonce_refresh_user_meta_operations' => $nonce_refresh_user_meta_operations,
 
         )
     );
@@ -650,11 +656,11 @@ function update_balance()
         if ($remains >= 0) {
             update_user_meta($user_id, 'limit', 1000);
             update_user_meta($user_id, 'balance', $remains);
-            $oper = array('hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => $remains, 'time' => $time);
+            $oper = array('amount' => $amount, 'hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => $remains, 'time' => $time);
         } else {
             update_user_meta($user_id, 'limit', 1000 + $remains);
             update_user_meta($user_id, 'balance', 0);
-            $oper = array('hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => 0, 'time' => $time);
+            $oper = array('amount' => $amount, 'hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => 0, 'time' => $time);
         }
         $operations[] = $oper;
         update_user_meta($user_id, 'operations', $operations);
@@ -704,6 +710,18 @@ function change_status()
         wp_send_json_error('No data received');
 
     }
+}
+
+add_action('wp_ajax_refresh_user_meta_operations', 'refresh_user_meta_operations');
+add_action('wp_ajax_nopriv_refresh_user_meta_operations', 'refresh_user_meta_operations');
+function refresh_user_meta_operations()
+{
+    if (!check_ajax_referer('nonce_refresh_user_meta_operations', 'security', false)) {
+        wp_send_json_error('Неверный nonce.');
+    }
+    $user_id = get_current_user_id();
+    $user_meta_operations = get_user_meta($user_id, 'operations', true);
+    wp_send_json_success($user_meta_operations);
 }
 
 

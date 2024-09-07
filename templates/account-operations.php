@@ -91,7 +91,9 @@ get_header(); ?>
                                     <th class="text-capitalize-first">Баланс после</th>
                                 </tr>
                             </thead>
-                            <tbody></tbody>
+                            <tbody id="operations_table">
+
+                            </tbody>
                         </table>
                         <!---->
                     </div>
