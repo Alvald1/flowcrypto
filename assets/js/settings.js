@@ -53,25 +53,7 @@ jQuery(document).ready(function ($) {
                 if (response.success) {
                     uuid = response.data['uuid']
                     showCustomAlert(uuid)
-                    $.ajax({
-                        url: myajax.url,
-                        type: 'POST',
-                        data: {
-                            action: 'change_status',
-                            data: 'WAIT',
-                            security: myajax.nonce_change_status
-                        },
-                        success: function (response) {
-                            if (response.success) {
-                                $('#automatic').text('Ожидание тестового сообщения')
-                            } else {
-                                console.error('Error updating userMeta:', response.data);
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            console.error('AJAX Error:', status, error);
-                        }
-                    });
+                    $('#automatic').text('Ожидание тестового сообщения')
                 } else {
                     console.error('Error updating userMeta:', response.data);
                 }

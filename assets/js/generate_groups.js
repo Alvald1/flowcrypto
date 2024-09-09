@@ -265,27 +265,22 @@ jQuery(document).ready(function ($) {
         var $input = $row.find('input.form-control.form-control-sm');
         var inputValue = $input.val();
 
-        var dataObject = {
-            id: generateUUID(),
-            name: inputValue,
-            all: 0,
-            active: 0
-        };
+
 
         $.ajax({
             url: myajax.url,
             type: 'POST',
             data: {
                 action: 'update_groups',
-                data: dataObject,
+                data: inputValue,
                 security: myajax.nonce_update_groups
             },
             success: function (response) {
                 if (response.success) {
-                    let tr = makeTr(dataObject);
+                    userMeta = Object.values(response.data);
+                    let tr = makeTr(userMeta[Object.keys(userMeta).length - 1]);
                     $row.remove();
                     $('#groupTableBody').append(tr);
-                    userMeta = Object.values(response.data);
                 } else {
                     console.error('Error:', response.data);
                 }

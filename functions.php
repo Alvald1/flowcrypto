@@ -1,5 +1,21 @@
 <?php
 
+function guidv4($data = null)
+{
+    // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
+    $data = $data ?? random_bytes(16);
+    assert(strlen($data) == 16);
+
+    // Set version to 0100
+    $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+    // Set bits 6-7 to 10
+    $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+
+    // Output the 36 character UUID.
+    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+}
+
+
 add_action('login_enqueue_scripts', 'my_login_stylesheet');
 function my_login_stylesheet()
 {
@@ -135,7 +151,6 @@ function myajax_data()
 
     $nonce_generate_uuid = wp_create_nonce('nonce_generate_uuid');
     $nonce_check_status = wp_create_nonce('nonce_check_status');
-    $nonce_change_status = wp_create_nonce('nonce_change_status');
     $nonce_refresh_user_meta_operations = wp_create_nonce('nonce_refresh_user_meta_operations');
 
 
@@ -163,7 +178,6 @@ function myajax_data()
             'nonce_custom_logout' => $nonce_custom_logout,
             'nonce_generate_uuid' => $nonce_generate_uuid,
             'nonce_check_status' => $nonce_check_status,
-            'nonce_change_status' => $nonce_change_status,
             'nonce_refresh_user_meta_operations' => $nonce_refresh_user_meta_operations,
 
         )
@@ -317,6 +331,7 @@ function get_users_data()
 
 
 
+
 add_action('wp_ajax_update_devices', 'update_devices');
 add_action('wp_ajax_nopriv_update_devices', 'update_devices');
 function update_devices()
@@ -331,7 +346,8 @@ function update_devices()
         if (is_array($user_meta_devices) == false) {
             $user_meta_devices = [];
         }
-        $user_meta_devices[] = $data;
+        $tmp = array('name' => $data, 'id' => guidv4());
+        $user_meta_devices[] = $tmp;
         update_user_meta($user_id, 'devices', $user_meta_devices);
         wp_send_json_success($user_meta_devices);
     } else {
@@ -411,7 +427,7 @@ function update_groups()
         if (is_array($user_meta_groups) == false) {
             $user_meta_groups = [];
         }
-        $user_meta_groups[] = $data;
+        $user_meta_groups[] = array('name' => $data, 'id' => guidv4(), 'all' => 0, 'active' => 0);
         update_user_meta($user_id, 'groups', $user_meta_groups);
         wp_send_json_success($user_meta_groups);
     } else {
@@ -678,6 +694,7 @@ function generate_uuid()
     $uuid = uniqid('', true);
     $user_id = get_current_user_id();
     update_user_meta($user_id, 'uuid', $uuid);
+    update_user_meta($user_id, 'status_auto', 'WAIT');
     wp_send_json_success(array('uuid' => $uuid));
 }
 
@@ -693,22 +710,6 @@ function check_status()
     wp_send_json_success($status_key);
 }
 
-add_action('wp_ajax_change_status', 'change_status');
-add_action('wp_ajax_nopriv_change_status', 'change_status');
-function change_status()
-{
-    if (!check_ajax_referer('nonce_change_status', 'security', false)) {
-        wp_send_json_error('Неверный nonce.');
-    }
-    if (isset($_POST['data'])) {
-        $user_id = get_current_user_id();
-        update_user_meta($user_id, 'status_auto', $_POST['data']);
-        wp_send_json_success('');
-    } else {
-        wp_send_json_error('No data received');
-
-    }
-}
 
 add_action('wp_ajax_refresh_user_meta_operations', 'refresh_user_meta_operations');
 add_action('wp_ajax_nopriv_refresh_user_meta_operations', 'refresh_user_meta_operations');
