@@ -134,60 +134,19 @@ jQuery(document).ready(function ($) {
             type: 'POST',
             data: {
                 action: 'aprove_income',
-                interval: 60 * 60 * 24 * 100,
-                address: $('#address_income').text(),
+                amount: amount,
                 security: myajax.nonce_aprove_income
             },
             success: function (response) {
                 if (response.success) {
-                    data = JSON.parse(response.data)['data'];
-                    size = data.length
-                    for (elem of data) {
-                        t1 = Number(elem['amount'])
-                        t2 = (amount * 10 ** elem['decimals'])
-                        if (elem['confirmed'] == 1 && t1 == t2) {
-                            flag = 1
-                            $.ajax({
-                                url: myajax.url,
-                                type: 'POST',
-                                data: {
-                                    action: 'update_balance',
-                                    amount: amount,
-                                    time: elem['block_timestamp'],
-                                    hash: elem['hash'],
-                                    security: myajax.nonce_update_balance
-                                },
-                                success: function (response) {
-                                    if (response.success) {
-                                        flag = 2
-                                        location.reload()
-                                        alert('Пополнение засчитано')
-                                    } else {
-                                        console.error('Error updating userMeta:', response.data);
-                                    }
-                                },
-                                error: function (xhr, status, error) {
-                                    console.error('AJAX Error:', status, error);
-                                }
-                            }).done(function (response) {
-                                if (flag !== 2 && size === 0) {
-                                    flag = 3
-                                    alert('Пополнение не засчитано')
-                                }
-                            })
-                        }
-                        size -= 1
-                    }
+                    location.reload()
+                    alert('Пополнение засчитано')
                 } else {
-                    console.error('Error updating userMeta:', response.data);
+                    alert('Пополнение не засчитано')
                 }
             },
             error: function (xhr, status, error) {
                 console.error('AJAX Error:', status, error);
-            }
-        }).done(function (response) {
-            if (flag === 0 && size === 0) {
-                alert('Пополнение не засчитано')
             }
         })
     }

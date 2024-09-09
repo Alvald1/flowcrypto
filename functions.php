@@ -132,7 +132,7 @@ function myajax_data()
     $nonce_aprove_income = wp_create_nonce('nonce_aprove_income');
     $nonce_get_nickname = wp_create_nonce('nonce_get_nickname');
     $nonce_custom_logout = wp_create_nonce('nonce_custom_logout');
-    $nonce_update_balance = wp_create_nonce('nonce_update_balance');
+
     $nonce_generate_uuid = wp_create_nonce('nonce_generate_uuid');
     $nonce_check_status = wp_create_nonce('nonce_check_status');
     $nonce_change_status = wp_create_nonce('nonce_change_status');
@@ -161,7 +161,6 @@ function myajax_data()
             'nonce_aprove_income' => $nonce_aprove_income,
             'nonce_get_nickname' => $nonce_get_nickname,
             'nonce_custom_logout' => $nonce_custom_logout,
-            'nonce_update_balance' => $nonce_update_balance,
             'nonce_generate_uuid' => $nonce_generate_uuid,
             'nonce_check_status' => $nonce_check_status,
             'nonce_change_status' => $nonce_change_status,
@@ -600,9 +599,10 @@ function aprove_income()
     $API = '322babbd-8b54-43db-93e2-6aa364c6a835';
     $trc20id = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
     $cur_time = time();
-    $interval = $_POST['interval'];
+    $interval = 60 * 60 * 25 * 100;
     $start_time = $cur_time - $interval; // Start time
-    $address = $_POST['address'];
+    $address = 'TDyDrLyzj8fjgkBqdcBHL1gjnEYk6CLnmj';
+    $amount = (float) $_POST['amount'];
     curl_setopt_array($curl, [
         CURLOPT_URL => "https://apilist.tronscanapi.com/api/transfer/trc20?address={$address}&trc20Id={$trc20id}&start=0&limit=5&direction=2&reverse=true&db_version=1&start_timestamp={$start_time}&end_timestamp={$cur_time}",
         CURLOPT_RETURNTRANSFER => true,
@@ -612,63 +612,61 @@ function aprove_income()
     ]);
 
     $out = curl_exec($curl);
-
+    $flag = 0;
     if ($out === false) {
         $error_msg = curl_error($curl);
         curl_close($curl);
         wp_send_json_error($error_msg);  // Send error response if cURL fails
     } else {
         curl_close($curl);
-        wp_send_json_success($out);  // Decode and send the successful response
-    }
+        $response_data = json_decode($out, true)['data'];
+        foreach ($response_data as $elem) {
+            $t1 = (float) $elem['amount'];
+            $t2 = $amount * pow(10, $elem['decimals']);
 
-}
+            if ($elem['confirmed'] === 1 && $t1 == $t2) {
+                $time = $elem['time'];
+                $hash = $elem['hash'];
+                $user_id = get_current_user_id();
+                $operations = get_user_meta($user_id, 'operations', true);
+                if (is_array($operations) == false) {
+                    $operations = [];
+                }
+                foreach ($operations as $operation) {
+                    if ($operation['hash'] === $hash) {
+                        wp_send_json_error('duplicate');
+                    }
+                }
+                $income = floatval($amount);
+                $tmp = get_user_meta($user_id, 'limit', true);
+                $cur_limit = floatval($tmp == '' ? '0' : $tmp);
+                $tmp = get_user_meta($user_id, 'balance', true);
+                $prev_balance = floatval($tmp == '' ? '0' : $tmp);
+                $remains = ($cur_limit + $income + $prev_balance) - 1000;
 
-
-add_action('wp_ajax_update_balance', 'update_balance');
-add_action('wp_ajax_nopriv_update_balance', 'update_balance');
-function update_balance()
-{
-    if (!check_ajax_referer('nonce_update_balance', 'security', false)) {
-        wp_send_json_error('Неверный nonce.');
-    }
-    if (isset($_POST['amount'])) {
-        $amount = $_POST['amount'];
-        $time = $_POST['time'];
-        $hash = $_POST['hash'];
-        $user_id = get_current_user_id();
-        $operations = get_user_meta($user_id, 'operations', true);
-        if (is_array($operations) == false) {
-            $operations = [];
-        }
-        foreach ($operations as $operation) {
-            if ($operation['hash'] === $hash) {
-                wp_send_json_error('duplicate');
+                if ($remains >= 0) {
+                    update_user_meta($user_id, 'limit', 1000);
+                    update_user_meta($user_id, 'balance', $remains);
+                    $oper = array('amount' => $amount, 'hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => $remains, 'time' => $time);
+                } else {
+                    update_user_meta($user_id, 'limit', 1000 + $remains);
+                    update_user_meta($user_id, 'balance', 0);
+                    $oper = array('amount' => $amount, 'hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => 0, 'time' => $time);
+                }
+                $operations[] = $oper;
+                update_user_meta($user_id, 'operations', $operations);
+                $flag = 1;
+                break;
             }
         }
-        $income = floatval($amount);
-        $tmp = get_user_meta($user_id, 'limit', true);
-        $cur_limit = floatval($tmp == '' ? '0' : $tmp);
-        $tmp = get_user_meta($user_id, 'balance', true);
-        $prev_balance = floatval($tmp == '' ? '0' : $tmp);
-        $remains = ($cur_limit + $income + $prev_balance) - 1000;
-
-        if ($remains >= 0) {
-            update_user_meta($user_id, 'limit', 1000);
-            update_user_meta($user_id, 'balance', $remains);
-            $oper = array('amount' => $amount, 'hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => $remains, 'time' => $time);
+        if ($flag === 1) {
+            wp_send_json_success('');
         } else {
-            update_user_meta($user_id, 'limit', 1000 + $remains);
-            update_user_meta($user_id, 'balance', 0);
-            $oper = array('amount' => $amount, 'hash' => $hash, 'prev_balance' => $prev_balance, 'balance' => 0, 'time' => $time);
+            wp_send_json_error('');
         }
-        $operations[] = $oper;
-        update_user_meta($user_id, 'operations', $operations);
-        wp_send_json_success('');
-    } else {
-        wp_send_json_error('No data received');
     }
 }
+
 
 add_action('wp_ajax_generate_uuid', 'generate_uuid');
 add_action('wp_ajax_nopriv_generate_uuid', 'generate_uuid');
