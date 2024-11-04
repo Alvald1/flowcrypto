@@ -95,7 +95,6 @@ function add_js_and_css()
             )
         );
     }
-
     if (is_page_template('templates/statistic.php')) {
         wp_enqueue_script('get_devices', get_template_directory_uri() . '/assets/js/get_devices.js', array('jquery'), null, true);
 
@@ -109,6 +108,13 @@ function add_js_and_css()
 
     }
     if (is_page_template('templates/requisites.php')) {
+        wp_enqueue_script(
+            'qrcode-js',
+            'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+            array(),
+            null,
+            true
+        );
         wp_enqueue_script('requisites', get_template_directory_uri() . '/assets/js/requisites.js', array('jquery'), null, true);
         wp_enqueue_script('generate_devices', get_template_directory_uri() . '/assets/js/generate_devices.js', array('jquery'), null, true);
         wp_localize_script('generate_devices', 'myUserData', array('url' => get_template_directory_uri()));
@@ -346,7 +352,7 @@ function update_devices()
         if (is_array($user_meta_devices) == false) {
             $user_meta_devices = [];
         }
-        $tmp = array('name' => $data, 'id' => guidv4());
+        $tmp = array('name' => $data, 'id' => guidv4(), 'status' => 'offline');
         $user_meta_devices[] = $tmp;
         update_user_meta($user_id, 'devices', $user_meta_devices);
         wp_send_json_success($user_meta_devices);

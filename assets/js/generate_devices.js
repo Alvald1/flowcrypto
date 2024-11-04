@@ -1,3 +1,4 @@
+
 jQuery(document).ready(function ($) {
     var userMeta;
     refreshUserMeta();
@@ -119,7 +120,14 @@ jQuery(document).ready(function ($) {
         td1.append(span);
         row.append(td1);
 
-        var td2 = $('<td class="td-name"></td>').text(device.name);
+        var td2 = $('<td class="td-name"></td>');
+        var t
+        if (device.status === 'offline')
+            t = $('<div></div>').addClass('small-circle-grey');
+        else
+            t = $('<div></div>').addClass('small-circle-green');
+        td2.append(t); // Добавляем круг
+        td2.append(device.name); // Добавляем текст
         row.append(td2);
 
         var td3 = $('<td></td>').addClass('text-end');
@@ -158,15 +166,6 @@ jQuery(document).ready(function ($) {
         $('#deviceTableBody').append(newRow);
     }
 
-    function generateUUID() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
-
-
-
 
     // Запуск получения данных и установки обработчиков после получения данных
 
@@ -184,6 +183,20 @@ jQuery(document).ready(function ($) {
 
     $('#deviceTableBody').on('click', '.cancel-button', function () {
         $(this).closest('tr').remove();
+    });
+
+    $('#deviceTableBody').on('click', '.qr-button', function () {
+        var tr = $(this).closest('tr');
+        var id = tr.find('span').attr('data-bs-original-title');
+        const qrContainer = document.getElementById('qr-code-div');
+        qrContainer.innerHTML = ''; // Очистить предыдущий QR-код, если он есть
+
+        new QRCode(qrContainer, {
+            text: id,
+            width: 380,
+            height: 380,
+        });
+        $('.btn-open_qr').click();
     });
 
     $('#deviceTableBody').on('click', '.edit-button', function () {

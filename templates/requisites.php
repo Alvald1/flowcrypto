@@ -819,7 +819,7 @@ get_header(); ?>
             </div>
         </div>
     </div>
-    <div class="modal fade" id='requisites_devices' tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal fade" id='requisites_devices' tabindex="-1" style="display: none; z-index: 2;" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -860,7 +860,7 @@ get_header(); ?>
             </div>
         </div>
     </div>
-    <div class="modal fade" id='requisites_group' tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal fade" id='requisites_group' tabindex="-1" style="display: none; z-index: 2;" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -2612,6 +2612,25 @@ get_header(); ?>
                             class="btn btn-outline-primary btn-sm text-capitalize-first">сохранить</button>
                         <!---->
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id='qr_code_modal' tabindex="-1" style="display: none; z-index: 3;" aria-modal="true"
+        role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">QR Code</h5><button type="button" class="btn-close btn-close_qr"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="qr-code-div" class="d-flex justify-content-center"></div>
+                </div>
+                <div class="modal-footer d-flex justify-content-end"><button type="button" style="display: none;"
+                        class="btn-open_qr">open</button>
+                    <button type="button"
+                        class="btn btn-outline-dark btn-sm text-capitalize-first btn-close_qr2">ок</button>
                 </div>
             </div>
         </div>

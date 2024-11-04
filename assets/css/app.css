@@ -6,6 +6,35 @@
     }
 }
 
+.small-circle-green {
+    width: 10px;
+    /* Ширина круга */
+    height: 10px;
+    /* Высота круга */
+    background-color: green;
+    /* Цвет фона */
+    border-radius: 50%;
+    /* Делает элемент кругом */
+    display: inline-block;
+    /* Для корректного отображения */
+    margin-right: 10px;
+}
+
+
+.small-circle-grey {
+    width: 10px;
+    /* Ширина круга */
+    height: 10px;
+    /* Высота круга */
+    background-color: grey;
+    /* Цвет фона */
+    border-radius: 50%;
+    /* Делает элемент кругом */
+    display: inline-block;
+    /* Для корректного отображения */
+    margin-right: 10px;
+}
+
 :root {
     --bs-blue: #0d6efd;
     --bs-indigo: #6610f2;
