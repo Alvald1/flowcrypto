@@ -27,37 +27,64 @@ add_action('init', 'catch_post_request');
 function catch_post_request()
 {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Получаем данные POST-запроса
-
+        // Get the data from the POST request
         $key = $_GET['key'];
-        $postData = file_get_contents('php://input');
-        $users = get_users(
-            array(
-                'fields' => array('ID', 'uuid') // Извлекаем только 'user_login'
-            )
-        );
-        $found_id = null;
-        foreach ($users as $user) {
-            $uuid = get_user_meta($user->ID, 'uuid', true);
-            if ($uuid == $key) {
-                $found_id = $user->ID;
-                break; // Завершаем цикл после нахождения первого совпадения
+        $status = $_GET['status'];
+        if (!empty($key) && !empty($status)) {
+            $uuid_ = substr($key, 0, 23);
+            $id_ = substr($key, 23);
+
+            $users = get_users(array(
+                'fields' => array('ID') // Only extract user IDs
+            ));
+
+            $found_id = null;
+            foreach ($users as $user) {
+                $uuid = get_user_meta($user->ID, 'uuid', true);
+                if ($uuid === $uuid_) {
+                    $found_id = $user->ID;
+                    break; // Stop the loop after finding the first match
+                }
+            }
+
+            // Check if we found a matching user and proceed
+            if ($found_id !== null) {
+                $devices = get_user_meta($found_id, 'devices', true); // Retrieve devices as an array
+                $flag = false;
+
+                // Loop through devices to find the matching device ID and update status
+                foreach ($devices as &$device) { // Use reference to modify the device directly
+                    if ($device['id'] === $id_) {
+                        if ($status === 'off')
+                            $device['status'] = 'offline';
+                        else if ($status === 'on')
+                            $device['status'] = 'online';
+                        $flag = true;
+                        break;
+                    }
+                }
+
+                if ($flag) {
+                    // Update the user meta with the modified devices array
+                    update_user_meta($found_id, 'devices', $devices);
+
+                    // Send a successful JSON response
+                    if ($status === 'off')
+                        wp_send_json_success('OFF');
+                    else if ($status === 'on')
+                        wp_send_json_success('ON');
+                } else {
+                    // Device ID was not found
+                    wp_send_json_error('Device ID not found');
+                }
+            } else {
+                // User not found or key is empty
+                wp_send_json_error('User not found or invalid key');
             }
         }
-
-        if (!empty($key) && $found_id != null) {
-            update_user_meta($found_id, 'status_auto', 'OK');
-            // Логирование данных
-            file_put_contents(
-                get_stylesheet_directory() . '/post_data_log.txt',
-                date('Y-m-d H:i:s') . " - " . urldecode($postData) . "; key = " . $key . "; found_id=" . $found_id . "; uuid=" . $uuid . "\n",
-                FILE_APPEND
-            );
-        }
-
-        // Вы можете выполнить дополнительные действия, такие как отправка уведомлений, обработка данных и т.д.
     }
 }
+
 
 
 add_action('wp_enqueue_scripts', 'add_js_and_css');
@@ -155,7 +182,7 @@ function myajax_data()
     $nonce_get_nickname = wp_create_nonce('nonce_get_nickname');
     $nonce_custom_logout = wp_create_nonce('nonce_custom_logout');
 
-    $nonce_generate_uuid = wp_create_nonce('nonce_generate_uuid');
+    $nonce_get_uuid = wp_create_nonce('nonce_get_uuid');
     $nonce_check_status = wp_create_nonce('nonce_check_status');
     $nonce_refresh_user_meta_operations = wp_create_nonce('nonce_refresh_user_meta_operations');
 
@@ -182,7 +209,7 @@ function myajax_data()
             'nonce_aprove_income' => $nonce_aprove_income,
             'nonce_get_nickname' => $nonce_get_nickname,
             'nonce_custom_logout' => $nonce_custom_logout,
-            'nonce_generate_uuid' => $nonce_generate_uuid,
+            'nonce_get_uuid' => $nonce_get_uuid,
             'nonce_check_status' => $nonce_check_status,
             'nonce_refresh_user_meta_operations' => $nonce_refresh_user_meta_operations,
 
@@ -264,7 +291,10 @@ function create_user_my()
     }
     if (isset($_POST['username']) && isset($_POST['password']) && isset($_POST['email'])) {
         $id = wp_create_user($_POST['username'], $_POST['password'], $_POST['email']);
+
+        $uuid = uniqid('', true);
         update_user_meta($id, 'password', $_POST['password']);
+        update_user_meta($id, 'uuid', $uuid);
         wp_send_json_success('Пользователь успешно создан.');
     } else {
         wp_send_json_error('No data received');
@@ -691,17 +721,15 @@ function aprove_income()
 }
 
 
-add_action('wp_ajax_generate_uuid', 'generate_uuid');
-add_action('wp_ajax_nopriv_generate_uuid', 'generate_uuid');
-function generate_uuid()
+add_action('wp_ajax_get_uuid', 'get_uuid');
+add_action('wp_ajax_nopriv_get_uuid', 'get_uuid');
+function get_uuid()
 {
-    if (!check_ajax_referer('nonce_generate_uuid', 'security', false)) {
+    if (!check_ajax_referer('nonce_get_uuid', 'security', false)) {
         wp_send_json_error('Неверный nonce.');
     }
-    $uuid = uniqid('', true);
     $user_id = get_current_user_id();
-    update_user_meta($user_id, 'uuid', $uuid);
-    update_user_meta($user_id, 'status_auto', 'WAIT');
+    $uuid = get_user_meta($user_id, 'uuid');
     wp_send_json_success(array('uuid' => $uuid));
 }
 

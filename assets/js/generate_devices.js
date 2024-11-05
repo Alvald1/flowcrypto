@@ -191,12 +191,25 @@ jQuery(document).ready(function ($) {
         const qrContainer = document.getElementById('qr-code-div');
         qrContainer.innerHTML = ''; // Очистить предыдущий QR-код, если он есть
 
-        new QRCode(qrContainer, {
-            text: id,
-            width: 380,
-            height: 380,
+        $.ajax({
+            url: myajax.url,
+            type: 'POST',
+            data: {
+                action: 'get_uuid',
+                security: myajax.nonce_get_uuid
+            },
+            success: function (response) {
+                id = response.data.uuid + id
+                new QRCode(qrContainer, {
+                    text: id,
+                    width: 380,
+                    height: 380,
+                });
+                $('.btn-open_qr').click();
+            }
         });
-        $('.btn-open_qr').click();
+
+
     });
 
     $('#deviceTableBody').on('click', '.edit-button', function () {
