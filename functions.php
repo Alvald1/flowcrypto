@@ -571,6 +571,7 @@ function refresh_user_meta_requisites()
     $user_id = get_current_user_id();
     $user_meta_requisites = get_user_meta($user_id, 'requisites', true);
     wp_send_json_success($user_meta_requisites);
+
 }
 
 

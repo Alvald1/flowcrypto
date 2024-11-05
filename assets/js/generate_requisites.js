@@ -18,25 +18,7 @@ jQuery(document).ready(function ($) {
     $(window).load(function () {
         get_devices()
         get_groups()
-        $.ajax({
-            url: myajax.url,
-            type: 'POST',
-            data: {
-                action: 'refresh_user_meta_requisites',
-                security: myajax.nonce_refresh_user_meta_requisites
-            },
-            success: function (response) {
-                if (response.success) {
-                    requisites_all = Object.values(response.data);
-                    makeTable()
-                } else {
-                    console.error('Error updating userMeta:', response.data);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('AJAX Error:', status, error);
-            }
-        });
+
     })
 
     function get_devices() {
@@ -49,7 +31,26 @@ jQuery(document).ready(function ($) {
             },
             success: function (response) {
                 if (response.success) {
-                    devices = Object.values(response.data); // Обновляем myUserData                    
+                    devices = Object.values(response.data); // Обновляем myUserData  
+                    $.ajax({
+                        url: myajax.url,
+                        type: 'POST',
+                        data: {
+                            action: 'refresh_user_meta_requisites',
+                            security: myajax.nonce_refresh_user_meta_requisites
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                requisites_all = Object.values(response.data);
+                                makeTable()
+                            } else {
+                                console.error('Error updating userMeta:', response.data);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('AJAX Error:', status, error);
+                        }
+                    });
                 } else {
                     console.error('Error updating userMeta:', response.data);
                 }
@@ -186,8 +187,17 @@ jQuery(document).ready(function ($) {
         var $div1 = $('<div></div>');
         var $div2 = $('<div class="d-flex flex-column"></div>');
 
+        var device = devices.find(device => device.id === data.id_device);
+
+        var t
+        if (device !== undefined) {
+            if (device.status === 'offline')
+                t = $('<div></div>').addClass('small-circle-grey');
+            else
+                t = $('<div></div>').addClass('small-circle-green');
+        }
         // Создаем первый div в первой ячейке
-        var $div3 = $('<div></div>').append('<span class="ms-1">' + data.device + '</span>');
+        var $div3 = $('<div></div>').append(t).append('<span class="ms-1">' + data.device + '</span>');
 
         // Создаем второй div в первой ячейке
         var $div4 = $('<div></div>').append(
@@ -685,7 +695,7 @@ jQuery(document).ready(function ($) {
             device = devices[extractNumber(device)]['name']
         } else {
             device = 'n/a'
-            id_device = ''
+            id_device = 'n/a'
         }
         status_ = $('#statusLabel2').text()
         if (flag == 0) {
