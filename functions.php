@@ -22,20 +22,25 @@ function my_login_stylesheet()
     wp_enqueue_style('custom-login', get_template_directory_uri() . '/assets/css/login.css');
 }
 
+// Правильное добавление экшена для GET-запроса
+add_action('template_redirect', 'catch_get_request');
 
-add_action('init', 'catch_post_request');
-function catch_post_request()
+function catch_get_request()
 {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Get the data from the POST request
-        $key = $_GET['key'];
-        $status = $_GET['status'];
+    // Проверяем, есть ли нужные параметры 'key' и 'status' в запросе
+    if (isset($_GET['key']) && isset($_GET['status'])) {
+        // Получаем значения параметров 'key' и 'status' из GET-запроса
+        $key = sanitize_text_field($_GET['key']);
+        $status = sanitize_text_field($_GET['status']);
+
         if (!empty($key) && !empty($status)) {
+            // Извлекаем UUID и ID устройства из ключа
             $uuid_ = substr($key, 0, 23);
             $id_ = substr($key, 23);
 
+            // Получаем всех пользователей и их ID
             $users = get_users(array(
-                'fields' => array('ID') // Only extract user IDs
+                'fields' => array('ID')
             ));
 
             $found_id = null;
@@ -43,47 +48,43 @@ function catch_post_request()
                 $uuid = get_user_meta($user->ID, 'uuid', true);
                 if ($uuid === $uuid_) {
                     $found_id = $user->ID;
-                    break; // Stop the loop after finding the first match
+                    break; // Останавливаемся после нахождения первого совпадения
                 }
             }
 
-            // Check if we found a matching user and proceed
+            // Если пользователь с соответствующим UUID найден, продолжаем
             if ($found_id !== null) {
-                $devices = get_user_meta($found_id, 'devices', true); // Retrieve devices as an array
+                $devices = get_user_meta($found_id, 'devices', true); // Получаем устройства как массив
                 $flag = false;
 
-                // Loop through devices to find the matching device ID and update status
-                foreach ($devices as &$device) { // Use reference to modify the device directly
+                // Проходим по устройствам, чтобы найти нужное устройство и обновить его статус
+                foreach ($devices as &$device) {
                     if ($device['id'] === $id_) {
-                        if ($status === 'off')
-                            $device['status'] = 'offline';
-                        else if ($status === 'on')
-                            $device['status'] = 'online';
+                        $device['status'] = ($status === 'on') ? 'online' : 'offline';
                         $flag = true;
                         break;
                     }
                 }
 
                 if ($flag) {
-                    // Update the user meta with the modified devices array
+                    // Обновляем массив устройств в мета-пользователя
                     update_user_meta($found_id, 'devices', $devices);
+                    $nickname = get_user_meta($found_id, 'nickname', true);
 
-                    // Send a successful JSON response
-                    if ($status === 'off')
-                        wp_send_json_success('OFF');
-                    else if ($status === 'on')
-                        wp_send_json_success('ON');
+                    // Возвращаем JSON-ответ
+                    wp_send_json_success(['status' => strtoupper($status), 'nickname' => $nickname]);
                 } else {
-                    // Device ID was not found
+                    // ID устройства не найден
                     wp_send_json_error('Device ID not found');
                 }
             } else {
-                // User not found or key is empty
+                // Не найден пользователь с соответствующим UUID
                 wp_send_json_error('User not found or invalid key');
             }
         }
     }
 }
+
 
 
 
