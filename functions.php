@@ -56,11 +56,12 @@ function catch_get_request()
             if ($found_id !== null) {
                 $devices = get_user_meta($found_id, 'devices', true); // Получаем устройства как массив
                 $flag = false;
-
+                $name = '';
                 // Проходим по устройствам, чтобы найти нужное устройство и обновить его статус
                 foreach ($devices as &$device) {
                     if ($device['id'] === $id_) {
                         $device['status'] = ($status === 'on') ? 'online' : 'offline';
+                        $name = $device['name'];
                         $flag = true;
                         break;
                     }
@@ -69,10 +70,9 @@ function catch_get_request()
                 if ($flag) {
                     // Обновляем массив устройств в мета-пользователя
                     update_user_meta($found_id, 'devices', $devices);
-                    $nickname = get_user_meta($found_id, 'nickname', true);
 
                     // Возвращаем JSON-ответ
-                    wp_send_json_success(['status' => strtoupper($status), 'nickname' => $nickname]);
+                    wp_send_json_success(['status' => strtoupper($status), 'name' => $name]);
                 } else {
                     // ID устройства не найден
                     wp_send_json_error('Device ID not found');
